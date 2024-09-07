@@ -1,24 +1,24 @@
 import logo from './logo.svg';
 import './App.css';
+import Home from './Screens/Home';
+import { Route, Router, Routes } from 'react-router-dom';
+import CustomerTurnaround from './component/CustomerTurnaround';
+import CustomerInteraction from './component/CustomerInteraction';
+import TableTurnover from './component/TableTurnover';
+import DynamicRecource from './component/DynamicRecource';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/customerTurnaround" element={<CustomerTurnaround />} />
+        <Route path="/customerInteraction" element={<CustomerInteraction />} />
+        <Route path="/TableTurnover" element={<TableTurnover />} />
+        <Route path="/dynamicresourceallocation" element={<DynamicRecource />} />
+      </Routes>
     </div>
+   
   );
 }
 
