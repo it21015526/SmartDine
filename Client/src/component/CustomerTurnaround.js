@@ -1,88 +1,89 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
-import task from '../Assets/task1.mp4'
+import React, { useEffect, useState } from 'react';
+import { Form, Button, Container, Row, Col, Card } from 'react-bootstrap';
+import task from '../Assets/task1.mp4';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function CustomerTurnaround() {
+  const [taskType, setTaskType] = useState('');
+  const [videoFile, setVideoFile] = useState(null);
+  const [modelPath, setModelPath] = useState('');
 
+  const handleFileChange = (e) => {
+    setVideoFile(e.target.files[0]);
+  };
 
-    const [taskType, setTaskType] = useState('');
-    const [videoFile, setVideoFile] = useState(null);
-    const [modelPath, setModelPath] = useState('');
-  
-    const handleFileChange = (e) => {
-      setVideoFile(e.target.files[0]);
-    };
-  
+  useEffect(() => {
+    // Any side effects to be added here
+  }, []);
 
-    useEffect(() => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
+    const formData = new FormData();
+    formData.append('task_type', 'task1');
+    formData.append('video', videoFile);
+    if (modelPath) {
+      formData.append('model_path', modelPath);
+    }
 
-    }, [])
-
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-    
-        const formData = new FormData();
-        formData.append('task_type', taskType);
-        formData.append('video', videoFile);
-        if (modelPath) {
-          formData.append('model_path', modelPath);
-        }
-    
-        try {
-          const response = await axios.post('http://localhost:5000/process_video', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
-          console.log('Response::', response.data);
-        } catch (error) {
-          console.error('Error uploading file:', error);
-        }
-      };
-    
-
-
-
-
+    try {
+      const response = await axios.post('http://localhost:5000/process_video', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('Response:', response.data);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    }
+  };
 
   return (
-    <>
-     <div style={{padding  : 20}}>
-        <div style={{fontSize : 30,fontWeight : 'bold',textAlign : 'center',marginBottom : 10}}>
-        Customer turnaround 
-        </div>
-        <div style={{display : 'flex',justifyContent : 'space-between'}}>
-            <div style={{ backgroundColor: 'white', height: '100%', width: '50%', display: 'block' }}>
-              <video autoPlay loop muted style={{ width: '100%', height: '100%', objectFit: 'cover', zIndex: 10 }}>
-                    <source src={task} type="video/mp4" />
-                    Please use a browser that supports the video tag.
-                  </video>
+    <Container style={{ padding: 20 }}>
+      <Row className="mb-4">
+        <Col>
+          <h2 className="text-center font-weight-bold">Customer Turnaround</h2>
+        </Col>
+      </Row>
+      <Row>
+        <Col md={6}>
+          <video autoPlay loop muted style={{ width: '100%', height: '100%', objectFit: 'cover' }}>
+            <source src={task} type="video/mp4" />
+            Please use a browser that supports the video tag.
+          </video>
+        </Col>
+        <Col md={6}>
+          <Card className="mb-4" style={{ backgroundColor: 'cyan', borderRadius: 18 }}>
+            <Card.Body className="d-flex justify-content-center align-items-center">
+              <div>
+                <div className="text-center" style={{ fontSize: 50, fontWeight: 'bold' }}>6</div>
+                <div className="text-center font-weight-bold">Current Customer Count</div>
               </div>
-            <div style={{backgroundColor : 'white',height : '100%',width : '40%',display : 'block'}}>
-                  <div style={{backgroundColor : 'cyan',borderRadius : 18,padding : 10,margin : 10,height : 150,display : 'flex',justifyContent : 'center'}}>
-                    <div>
-                        <div style={{textAlign : 'center',fontSize : 50,fontWeight : 'bold'}}>
-                          6
-                        </div>
-                        <div style={{fontWeight : 'bold'}}>
-                          Current customer count 
-                        </div>
-                    </div>
-                  </div>
-                  <div style={{backgroundColor : 'cyan',borderRadius : 18,padding : 10,margin : 10,height : 150,display : 'flex',justifyContent : 'center'}}>
-                    <div>
-                        <div style={{textAlign : 'center',fontSize : 50,fontWeight : 'bold'}}>
-                          0
-                        </div>
-                        <div style={{fontWeight : 'bold'}}>
-                          Annomalies detected
-                        </div>
-                    </div>
-                  </div>
-            </div>
-        </div>
-    </div>    </>
-  )
+            </Card.Body>
+          </Card>
+
+          <Card className="mb-4" style={{ backgroundColor: 'cyan', borderRadius: 18 }}>
+            <Card.Body className="d-flex justify-content-center align-items-center">
+              <div>
+                <div className="text-center" style={{ fontSize: 50, fontWeight: 'bold' }}>0</div>
+                <div className="text-center font-weight-bold">Anomalies Detected</div>
+              </div>
+            </Card.Body>
+          </Card>
+
+          <Form onSubmit={handleSubmit}>
+            <Form.Group controlId="videoFile">
+              <Form.Label>Video File</Form.Label>
+              <Form.Control type="file" onChange={handleFileChange} required />
+            </Form.Group>
+
+            <Button variant="primary" type="submit" className="mt-3">
+              Submit
+            </Button>
+          </Form>
+        </Col>
+      </Row>
+    </Container>
+  );
 }
