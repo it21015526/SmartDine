@@ -1,24 +1,23 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { Route, Routes } from 'react-router-dom';
 import Home from './Screens/Home';
-import { Route, Router, Routes } from 'react-router-dom';
 import CustomerTurnaround from './component/CustomerTurnaround';
 import CustomerInteraction from './component/CustomerInteraction';
 import TableTurnover from './component/TableTurnover';
 import DynamicRecource from './component/DynamicRecource';
+import Layout from './component/Layout'; // Import Layout
 
 function App() {
   return (
     <div>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/customerTurnaround" element={<CustomerTurnaround />} />
-        <Route path="/customerInteraction" element={<CustomerInteraction />} />
-        <Route path="/TableTurnover" element={<TableTurnover />} />
-        <Route path="/dynamicresourceallocation" element={<DynamicRecource />} />
+        <Route path="/customerTurnaround" element={<Layout><CustomerTurnaround /></Layout>} />
+        <Route path="/customerInteraction" element={<Layout><CustomerInteraction /></Layout>} />
+        <Route path="/TableTurnover" element={<Layout><TableTurnover /></Layout>} />
+        <Route path="/dynamicresourceallocation" element={<Layout><DynamicRecource /></Layout>} />
       </Routes>
     </div>
-   
   );
 }
 

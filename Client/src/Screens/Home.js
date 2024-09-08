@@ -1,39 +1,125 @@
-import React from 'react'
+import React from 'react';
 import Grid from '@mui/material/Grid';
-import { Button } from '@mui/material';
+import { Button, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-function Home({navigaion}) {
-
-    const navigate = useNavigate()
-
-   
-
-
-
+function Home() {
+  const navigate = useNavigate();
 
   return (
-    <Grid container style={{height : '100vh',justifyContent : 'space-between',padding : 20}}>
-        <Grid xs = {12} md = {12}>
-            <div style={{fontSize : 40,textAlign : 'center',fontWeight : 'bold'}}>
-                Smart Dine 
-            </div>
-        </Grid>
-        <Grid style={{display : 'flex',justifyContent :'center'}} md = {12} xs = {12}>
-                <img src={require('../Assets/homeImg.png')}/>
-        </Grid>
-        <Grid md = {12} xs= {12} >
-            <div style={{justifyContent :'space-between',width : '100%',backgroundColor : 'white',display : 'flex'}}>
-                <Button variant='contained' onClick={() => {navigate('/customerTurnaround')}}>Customer Turnaround</Button>
-                <Button variant='contained' onClick={() => {navigate('/customerInteraction')}}>Customer Interaction</Button>
-                <Button variant='contained' onClick={() => {navigate('/TableTurnover')}}>Table turnover</Button>
-                <Button variant='contained' onClick={() => {navigate('/dynamicresourceallocation')}}>Dynamic recourse allocation</Button>
-            </div>
-        </Grid>
+    <Grid
+      container
+      style={{
+        minHeight: '100vh',
+        backgroundImage: 'url(https://source.unsplash.com/1600x900/?restaurant)',
+        backgroundSize: 'cover',
+        padding: '20px',
+        zIndex: 0, // Ensure the content is visible above background elements
+        position: 'relative',
+      }}
+    >
+      {/* Header */}
+      <Grid item xs={12} md={12}>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="15vh"
+        >
+          <Typography
+            variant="h2"
+            component="div"
+            style={{
+              color: 'Black',
+              fontWeight: 'bold',
+              textShadow: '2px 2px 4px rgba(0, 0, 0, 0.7)',
+            }}
+          >
+            Smart Dine
+          </Typography>
+        </Box>
+      </Grid>
 
+      {/* Image Section */}
+      <Grid
+        item
+        xs={12}
+        md={12}
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          marginBottom: '40px',
+        }}
+      >
+        <Box
+          component="img"
+          sx={{
+            height: { xs: 250, md: 400 },
+            width: { xs: 250, md: 400 },
+            borderRadius: '50%',
+            boxShadow: '0px 10px 20px rgba(0, 0, 0, 0.2)',
+          }}
+          alt="Smart Dine Image"
+          src={require('../Assets/newIcn.jpeg')}
+        />
+      </Grid>
+
+      {/* Button Section */}
+      <Grid item xs={12} md={12}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-around',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderRadius: '15px',
+            padding: '20px',
+            boxShadow: '0px 10px 20px rgba(0, 0, 0, 0.1)',
+            zIndex: 1, // Ensure the buttons stay above the background and other elements
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => navigate('/customerTurnaround')}
+            sx={{ fontSize: '1.2rem', padding: '10px 30px' }}
+          >
+            Customer Turnaround
+          </Button>
+
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => navigate('/customerInteraction')}
+            sx={{ fontSize: '1.2rem', padding: '10px 30px' }}
+          >
+            Customer Interaction
+          </Button>
+
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => navigate('/TableTurnover')}
+            sx={{ fontSize: '1.2rem', padding: '10px 30px' }}
+          >
+            Table Turnover
+          </Button>
+
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => navigate('/dynamicresourceallocation')}
+            sx={{ fontSize: '1.2rem', padding: '10px 30px' }}
+          >
+            Dynamic Resource Allocation
+          </Button>
+        </Box>
+      </Grid>
     </Grid>
-
-  )
+  );
 }
 
-export default Home
+export default Home;

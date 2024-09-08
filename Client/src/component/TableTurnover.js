@@ -1,44 +1,87 @@
-import React from 'react'
-import task from '../Assets/task3.mp4'
+import React, { useState } from 'react';
+import { Form, Button, Container, Row, Col, Card } from 'react-bootstrap';
+import task from '../Assets/task3.mp4'; // Import the video file
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+import axios from 'axios';
 
 function TableTurnover() {
+  const [taskType, setTaskType] = useState('');
+  const [videoFile, setVideoFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    setVideoFile(e.target.files[0]);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('task_type', 'task3');
+    formData.append('video', videoFile);
+
+    try {
+      const response = await axios.post('http://localhost:5000/process_video', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('Response:', response.data);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    }
+  };
+
   return (
-    <div style={{padding  : 20}}>
-        <div style={{fontSize : 30,fontWeight : 'bold',textAlign : 'center',marginBottom : 10}}>
-        Table turnover and Layout information
-        </div>
-        <div style={{display : 'flex',justifyContent : 'space-between'}}>
-            <div style={{ backgroundColor: 'white', height: '100%', width: '50%', display: 'block' }}>
-              <video autoPlay loop muted style={{ width: '100%', height: '100%', objectFit: 'cover', zIndex: 10 }}>
-                    <source src={task} type="video/mp4" />
-                    Please use a browser that supports the video tag.
-                  </video>
+    <Container style={{ padding: 20 }}>
+      <Row className="mb-4">
+        <Col>
+          <h2 className="text-center font-weight-bold">Table Turnover and Layout Information</h2>
+        </Col>
+      </Row>
+      <Row>
+        <Col md={6}>
+          <video autoPlay loop muted style={{ width: '100%', height: '100%', objectFit: 'cover' }}>
+            <source src={task} type="video/mp4" />
+            Please use a browser that supports the video tag.
+          </video>
+        </Col>
+        <Col md={6}>
+          <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+            <Card.Body>
+              <div className="d-flex justify-content-between">
+                <div>
+                  <h5>Current Table Turnover Rate:</h5>
+                  <p>16/25</p>
+                </div>
               </div>
-            <div style={{backgroundColor : 'white',height : '100%',width : '40%',display : 'block'}}>
-                  <div style={{backgroundColor : 'orange',borderRadius : 18,padding : 10,margin : 10,height : 150,display : 'flex',justifyContent : 'center'}}>
-                    <div>
-                        <div style={{textAlign : 'center',fontSize : 50,fontWeight : 'bold'}}>
-                          16/25
-                        </div>
-                        <div style={{fontWeight : 'bold'}}>
-                          Current tale turnover Rate
-                        </div>
-                    </div>
-                  </div>
-                  <div style={{backgroundColor : 'orange',borderRadius : 18,padding : 10,margin : 10,height : 150,display : 'flex',justifyContent : 'center'}}>
-                    <div>
-                        <div style={{textAlign : 'center',fontSize : 50,fontWeight : 'bold'}}>
-                          0
-                        </div>
-                        <div style={{fontWeight : 'bold'}}>
-                          Total Detected Layout Changes 
-                        </div>
-                    </div>
-                  </div>
-            </div>
-        </div>
-    </div>
-  )
+            </Card.Body>
+          </Card>
+
+          <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+            <Card.Body>
+              <div className="d-flex justify-content-between">
+                <div>
+                  <h5>Total Detected Layout Changes:</h5>
+                  <p>0</p>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+
+          <Form onSubmit={handleSubmit}>
+                <Form.Group controlId="videoFile">
+              <Form.Label>Video File</Form.Label>
+              <Form.Control type="file" onChange={handleFileChange} required />
+            </Form.Group>
+
+            <Button variant="primary" type="submit" className="mt-3">
+              Submit
+            </Button>
+          </Form>
+        </Col>
+      </Row>
+    </Container>
+  );
 }
 
-export default TableTurnover
+export default TableTurnover;
