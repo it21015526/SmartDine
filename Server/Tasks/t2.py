@@ -109,15 +109,3 @@ class Task2Model:
         print(f"Waiting for Assistance Duration: {waiting_duration:.2f} seconds")
 
 
-# Usage in the frame labeling logic:
-
-label = f"{classes[cls].replace('_', ' ')}".capitalize()
-
-# Get dynamic durations
-non_eating_time = self.engagement_times.get('non_eating_duration', "N/A")
-waiting_time = self.engagement_times.get('waiting_duration', "N/A")
-
-frame = cv2.rectangle(frame, tuple(box[:2]), tuple(box[2:]), (0, 0, 255), 2)
-frame = cv2.putText(frame, str(label), tuple(box[:2]), font, fontScale, color, thickness, cv2.LINE_AA)
-frame = cv2.putText(frame, f"Non-Eating time: {non_eating_time:.2f} seconds", (box[0], box[1] + 30), font, fontScale, color, thickness, cv2.LINE_AA)
-frame = cv2.putText(frame, f"Waiting time: {waiting_time:.2f} seconds", (box[0], box[1] + 60), font, fontScale, color, thickness, cv2.LINE_AA)
