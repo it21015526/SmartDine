@@ -9,7 +9,10 @@ class Task2Model:
         self.video_path = video_path
         self.detection_times = {}
         self.initial_food_areas = []
-        self.engagement_times = {}
+        self.engagement_times = {
+            'non_eating_duration': 0,
+            'waiting_duration': 0
+        }
 
     def detect_objects(self, frame):
         results = self.model.predict(frame)
@@ -22,6 +25,20 @@ class Task2Model:
         _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
         food_area = cv2.countNonZero(thresh)
         return food_area
+
+    def update_durations(self):
+        """ Updates non-eating and waiting time based on the engagement times. """
+        current_time = time.time()
+
+        # Non-eating time (using phone)
+        if 'non_eating_start' in self.engagement_times:
+            non_eating_time = current_time - self.engagement_times['non_eating_start']
+            self.engagement_times['non_eating_duration'] = non_eating_time
+        
+        # Waiting time (looking for assistance)
+        if 'looking_for_assistance_start' in self.engagement_times:
+            waiting_time = current_time - self.engagement_times['looking_for_assistance_start']
+            self.engagement_times['waiting_duration'] = waiting_time
 
     def process_frame(self, frame):
         # Detect objects in the frame
@@ -49,16 +66,21 @@ class Task2Model:
                     self.engagement_times['eating_start'] = time.time()
                     print(f"Eating started at: {self.engagement_times['eating_start']}")
                 self.engagement_times['eating'] = time.time()
+
             elif result['label'] == 'phone':
                 if 'non_eating_start' not in self.engagement_times:
                     self.engagement_times['non_eating_start'] = time.time()
                     print(f"Phone usage started at: {self.engagement_times['non_eating_start']}")
                 self.engagement_times['non_eating'] = time.time()
-            elif result['label'] == 'looking_around'                                                                                                                                                                                                                                                                                                                    :
+
+            elif result['label'] == 'looking_around':
                 if 'looking_for_assistance_start' not in self.engagement_times:
                     self.engagement_times['looking_for_assistance_start'] = time.time()
                     print(f"Looking for assistance started at: {self.engagement_times['looking_for_assistance_start']}")
                 self.engagement_times['looking_for_assistance'] = time.time()
+
+        # Update non-eating and waiting durations after processing the frame
+        self.update_durations()
 
     def process_video(self):
         cap = cv2.VideoCapture(self.video_path)
@@ -79,9 +101,23 @@ class Task2Model:
 
     def calculate_engagement_durations(self):
         eating_duration = self.engagement_times.get('eating', 0) - self.engagement_times.get('eating_start', 0)
-        non_eating_duration = self.engagement_times.get('non_eating', 0) - self.engagement_times.get('non_eating_start', 0)
-        looking_for_assistance_duration = self.engagement_times.get('looking_for_assistance', 0) - self.engagement_times.get('looking_for_assistance_start', 0)
+        non_eating_duration = self.engagement_times.get('non_eating_duration', 0)
+        waiting_duration = self.engagement_times.get('waiting_duration', 0)
 
         print(f"Eating Duration: {eating_duration:.2f} seconds")
         print(f"Non-Eating (Phone) Duration: {non_eating_duration:.2f} seconds")
-        print(f"Looking for Assistance Duration: {looking_for_assistance_duration:.2f} seconds")
+        print(f"Waiting for Assistance Duration: {waiting_duration:.2f} seconds")
+
+
+# Usage in the frame labeling logic:
+
+label = f"{classes[cls].replace('_', ' ')}".capitalize()
+
+# Get dynamic durations
+non_eating_time = self.engagement_times.get('non_eating_duration', "N/A")
+waiting_time = self.engagement_times.get('waiting_duration', "N/A")
+
+frame = cv2.rectangle(frame, tuple(box[:2]), tuple(box[2:]), (0, 0, 255), 2)
+frame = cv2.putText(frame, str(label), tuple(box[:2]), font, fontScale, color, thickness, cv2.LINE_AA)
+frame = cv2.putText(frame, f"Non-Eating time: {non_eating_time:.2f} seconds", (box[0], box[1] + 30), font, fontScale, color, thickness, cv2.LINE_AA)
+frame = cv2.putText(frame, f"Waiting time: {waiting_time:.2f} seconds", (box[0], box[1] + 60), font, fontScale, color, thickness, cv2.LINE_AA)

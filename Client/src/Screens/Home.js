@@ -62,6 +62,20 @@ function Home() {
           alt="Smart Dine Image"
           src={require('../Assets/newIcn.jpeg')}
         />
+      <a href="https://www.luckyelephanthotel.com/" target="_blank" rel="noopener noreferrer">
+        <Box
+          component="img"
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: 15,
+            height: { xs: 350, md: 100 },
+          }}
+          alt="Hotel Image"
+          src={require('../Assets/le.png')}
+        />
+      </a>
       </Grid>
 
       {/* Button Section */}
