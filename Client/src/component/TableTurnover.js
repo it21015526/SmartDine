@@ -12,6 +12,7 @@ function TableTurnover() {
     const fetchCustomerCount = () => {
       axios.get("http://localhost:5000/tableInfo")
         .then((res) => {
+          console.log(res.data)
           setTableTurnover(res.data);
         })
         .catch((error) => {
@@ -50,6 +51,7 @@ function TableTurnover() {
       <Row className="mb-4">
         <Col>
           <h2 className="text-center font-weight-bold">Table Turnover and Layout Information</h2>
+          <h6 className="text-center font-weight-bold">Last Updated : {tableTurnover.datetime}</h6>
         </Col>
       </Row>
       <Row>
@@ -65,7 +67,7 @@ function TableTurnover() {
               <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
                 <Card.Body style={{textAlign : 'center'}}>
                   <h5 >Average Table Rearranging time</h5>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>{tableTurnover.currentturnover}</p>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>{tableTurnover.avg_rearrangingTime}</p>
                 </Card.Body>
               </Card>
             </Col>
@@ -73,7 +75,7 @@ function TableTurnover() {
               <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
                 <Card.Body style={{textAlign : 'center'}}>
                   <h5>Total Table Rearranging time</h5>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>45.56 min</p>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>{tableTurnover.sum_rearrangingTime} min</p>
                 </Card.Body>
               </Card>
             </Col>
@@ -81,7 +83,7 @@ function TableTurnover() {
               <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
                 <Card.Body style={{textAlign : 'center'}}>
                   <h5>Average Cleaning Time</h5>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>5.4 min</p>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>{tableTurnover.avg_cleaningTime} min</p>
                 </Card.Body>
               </Card>
             </Col>
@@ -89,7 +91,7 @@ function TableTurnover() {
               <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
                 <Card.Body style={{textAlign : 'center'}}>
                   <h5>Total Cleaning Time</h5>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>30.56 min</p>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>{tableTurnover.sum_cleaningTime} min</p>
                 </Card.Body>
               </Card>
             </Col>
@@ -97,18 +99,11 @@ function TableTurnover() {
               <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
                 <Card.Body style={{textAlign : 'center'}}>
                   <h5>Table Turn Over Rate</h5>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>3.2</p>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>{tableTurnover.ttrate}</p>
                 </Card.Body>
               </Card>
             </Col>
-            <Col>
-              <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
-                <Card.Body style={{textAlign : 'center'}}>
-                  <h5>Total Detected Layout Changes:</h5>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>5</p>
-                </Card.Body>
-              </Card>
-            </Col>
+      
           </Row>
 
           <Form onSubmit={handleSubmit}>

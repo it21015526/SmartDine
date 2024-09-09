@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Button, Container, Row, Col, Card } from 'react-bootstrap';
 import task from '../Assets/task2.mp4'; // Import the video file
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -7,10 +7,30 @@ import axios from 'axios';
 function CustomerInteraction() {
   const [taskType, setTaskType] = useState('');
   const [videoFile, setVideoFile] = useState(null);
+  const [interInfo,setInterInfo] = useState([])
 
   const handleFileChange = (e) => {
     setVideoFile(e.target.files[0]);
   };
+
+
+  useEffect(() => {
+    const fetchInteractionInfo = () => {
+      axios.get("http://localhost:5000/interactionInfo")
+        .then((res) => {
+          console.log(res.data);
+          setInterInfo(res.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching customer count:", error);
+        });
+    };
+    fetchInteractionInfo();
+    const intervalId = setInterval(fetchInteractionInfo, 10000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,6 +55,7 @@ function CustomerInteraction() {
       <Row className="mb-4">
         <Col>
           <h2 className="text-center font-weight-bold">Customer Interaction</h2>
+          <h6 className="text-center font-weight-bold">Last Updated : {interInfo.datetime}</h6>
         </Col>
       </Row>
       <Row>
@@ -49,7 +70,7 @@ function CustomerInteraction() {
             <Col>
               <Card className="mb-4" style={{ backgroundColor: 'yellow', borderRadius: 18,height : 130 }}>
                 <Card.Body style={{textAlign : 'center'}}>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>1</p>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>{interInfo.nonEmpty}</p>
                   <h6 >Dining Completed Non-Empty plates</h6>
                 </Card.Body>
               </Card>
@@ -57,15 +78,15 @@ function CustomerInteraction() {
             <Col>
               <Card className="mb-4" style={{ backgroundColor: 'yellow', borderRadius: 18,height : 130 }}>
                 <Card.Body style={{textAlign : 'center'}}>
-                  <h5>Average Seating Time exceeded </h5>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>45.56</p>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>{interInfo.waitingTime} min.</p>
+                  <h5>Avg Assistance seeking Time </h5>
                 </Card.Body>
               </Card>
             </Col>
             <Col>
               <Card className="mb-4" style={{ backgroundColor: 'yellow', borderRadius: 18,height : 130 }}>
                 <Card.Body style={{textAlign : 'center'}}>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>5.4</p>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>{interInfo.nonEating} min.</p>
                   <h5>Non Eating Dining time </h5>
                 </Card.Body>
               </Card>
