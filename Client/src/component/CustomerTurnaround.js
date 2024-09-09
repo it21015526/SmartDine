@@ -8,15 +8,29 @@ export default function CustomerTurnaround() {
   const [taskType, setTaskType] = useState('');
   const [videoFile, setVideoFile] = useState(null);
   const [modelPath, setModelPath] = useState('');
+  const [CustomerCount,setCustomerCount] = useState([])
 
   const handleFileChange = (e) => {
     setVideoFile(e.target.files[0]);
   };
 
   useEffect(() => {
-    // Any side effects to be added here
+    const fetchCustomerCount = () => {
+      axios.get("http://localhost:5000/currentCustomer")
+        .then((res) => {
+          console.log(res.data);
+          setCustomerCount(res.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching customer count:", error);
+        });
+    };
+    fetchCustomerCount();
+    const intervalId = setInterval(fetchCustomerCount, 10000);
+    return () => clearInterval(intervalId);
   }, []);
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -57,7 +71,7 @@ export default function CustomerTurnaround() {
           <Card className="mb-4" style={{ backgroundColor: 'cyan', borderRadius: 18 }}>
             <Card.Body className="d-flex justify-content-center align-items-center">
               <div>
-                <div className="text-center" style={{ fontSize: 50, fontWeight: 'bold' }}>6</div>
+                <div className="text-center" style={{ fontSize: 50, fontWeight: 'bold' }}>{CustomerCount.customer_count}</div>
                 <div className="text-center font-weight-bold">Current Customer Count</div>
               </div>
             </Card.Body>
@@ -66,8 +80,8 @@ export default function CustomerTurnaround() {
           <Card className="mb-4" style={{ backgroundColor: 'cyan', borderRadius: 18 }}>
             <Card.Body className="d-flex justify-content-center align-items-center">
               <div>
-                <div className="text-center" style={{ fontSize: 50, fontWeight: 'bold' }}>0</div>
-                <div className="text-center font-weight-bold">Anomalies Detected</div>
+                <div className="text-center" style={{ fontSize: 50, fontWeight: 'bold' }}>{CustomerCount.datetime}</div>
+                <div className="text-center font-weight-bold">Last Updated</div>
               </div>
             </Card.Body>
           </Card>
