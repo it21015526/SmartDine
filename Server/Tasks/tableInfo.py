@@ -4,6 +4,8 @@ from datetime import datetime
 
 
 
+
+
 def init_db():
     conn = sqlite3.connect('restaurant_data.db')
     cursor = conn.cursor()

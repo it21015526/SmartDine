@@ -78,7 +78,7 @@ function CustomerInteraction() {
             <Col>
               <Card className="mb-4" style={{ backgroundColor: 'yellow', borderRadius: 18,height : 130 }}>
                 <Card.Body style={{textAlign : 'center'}}>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>{interInfo.waitingTime} min.</p>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>{interInfo.waitingTime/60} min.</p>
                   <h5>Avg Assistance seeking Time </h5>
                 </Card.Body>
               </Card>
@@ -86,7 +86,7 @@ function CustomerInteraction() {
             <Col>
               <Card className="mb-4" style={{ backgroundColor: 'yellow', borderRadius: 18,height : 130 }}>
                 <Card.Body style={{textAlign : 'center'}}>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>{interInfo.nonEating} min.</p>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>{interInfo.nonEating/60} min.</p>
                   <h5>Non Eating Dining time </h5>
                 </Card.Body>
               </Card>

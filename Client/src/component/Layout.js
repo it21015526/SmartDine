@@ -14,7 +14,7 @@ function Layout({ children }) {
           variant="h5" 
           fontWeight="bold" 
           style={{ cursor: 'pointer' }} 
-          onClick={() => navigate('/')} // Navigate to home page when clicked
+          onClick={() => navigate('/home')} // Navigate to home page when clicked
         >
           Smart Dine
         </Typography>

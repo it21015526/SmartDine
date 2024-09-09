@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Button, Container, Row, Col, Card } from 'react-bootstrap';
-import task from '../Assets/task3.mp4'; // Import the video file
+import { Form, Button, Container, Row, Col, Card, Tab, Tabs } from 'react-bootstrap';
+import task from '../Assets/task3.mp4'; // Import the first video file
+import taskAlt from '../Assets/cleanTbl.mp4'; // Import the second video file
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 
@@ -12,7 +13,7 @@ function TableTurnover() {
     const fetchCustomerCount = () => {
       axios.get("http://localhost:5000/tableInfo")
         .then((res) => {
-          console.log(res.data)
+          console.log(res.data);
           setTableTurnover(res.data);
         })
         .catch((error) => {
@@ -54,69 +55,153 @@ function TableTurnover() {
           <h6 className="text-center font-weight-bold">Last Updated : {tableTurnover.datetime}</h6>
         </Col>
       </Row>
-      <Row>
-        <Col md={6}>
-          <video autoPlay loop muted style={{ width: '100%', height: '100%', objectFit: 'cover' }}>
-            <source src={task} type="video/mp4" />
-            Please use a browser that supports the video tag.
-          </video>
-        </Col>
-        <Col md={6}>
-          <Row xs={1} sm={2} md={3} lg={3} className="g-4">
-            <Col>
-              <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
-                <Card.Body style={{textAlign : 'center'}}>
-                  <h5 >Average Table Rearranging time</h5>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>{tableTurnover.avg_rearrangingTime}</p>
-                </Card.Body>
-              </Card>
+
+      {/* Tabs structure for videos */}
+      <Tabs defaultActiveKey="first" id="video-tabs" className="mb-3">
+        {/* First video tab */}
+        <Tab eventKey="first" title="Video 1">
+          <Row>
+            <Col md={6}>
+              <video autoPlay loop muted style={{ width: '100%', height: '100%', objectFit: 'cover' }}>
+                <source src={task} type="video/mp4" />
+                Please use a browser that supports the video tag.
+              </video>
             </Col>
-            <Col>
-              <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
-                <Card.Body style={{textAlign : 'center'}}>
-                  <h5>Total Table Rearranging time</h5>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>{tableTurnover.sum_rearrangingTime} min</p>
-                </Card.Body>
-              </Card>
+            <Col md={6}>
+              <Row xs={1} sm={2} md={3} lg={3} className="g-4">
+                <Col>
+                  <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                    <Card.Body style={{ textAlign: 'center' }}>
+                      <h5>Average Table Rearranging Time</h5>
+                      <p style={{ fontWeight: 'bold', fontSize: 20 }}>{tableTurnover.avg_rearrangingTime / 60} min</p>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col>
+                  <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                    <Card.Body style={{ textAlign: 'center' }}>
+                      <h5>Total Table Rearranging Time</h5>
+                      <p style={{ fontWeight: 'bold', fontSize: 20 }}>{tableTurnover.sum_rearrangingTime / 60} min</p>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col>
+                  <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                    <Card.Body style={{ textAlign: 'center' }}>
+                      <h5>Average Cleaning Time</h5>
+                      <p style={{ fontWeight: 'bold', fontSize: 20 }}>{tableTurnover.avg_cleaningTime / 60} min</p>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col>
+                  <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                    <Card.Body style={{ textAlign: 'center' }}>
+                      <h5>Total Cleaning Time</h5>
+                      <p style={{ fontWeight: 'bold', fontSize: 20 }}>{tableTurnover.sum_cleaningTime / 60} min</p>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col>
+                  <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                    <Card.Body style={{ textAlign: 'center' }}>
+                      <h5>Table Turn Over Rate</h5>
+                      <p style={{ fontWeight: 'bold', fontSize: 20 }}>{tableTurnover.ttrate}</p>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              </Row>
+
+              <Form onSubmit={handleSubmit}>
+                <Form.Group controlId="videoFile">
+                  <Form.Label>Video File</Form.Label>
+                  <Form.Control type="file" onChange={handleFileChange} required />
+                </Form.Group>
+                <Button variant="primary" type="submit" className="mt-3">
+                  Submit
+                </Button>
+              </Form>
             </Col>
-            <Col>
-              <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
-                <Card.Body style={{textAlign : 'center'}}>
-                  <h5>Average Cleaning Time</h5>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>{tableTurnover.avg_cleaningTime} min</p>
-                </Card.Body>
-              </Card>
+          </Row>
+        </Tab>
+
+        {/* Second video tab */}
+        <Tab eventKey="second" title="Video 2">
+          <Row>
+            <Col md={6}>
+              <video autoPlay loop muted style={{ width: '100%', height: '100%', objectFit: 'cover' }}>
+                <source src={taskAlt} type="video/mp4" />
+                Please use a browser that supports the video tag.
+              </video>
             </Col>
-            <Col>
-              <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
-                <Card.Body style={{textAlign : 'center'}}>
-                  <h5>Total Cleaning Time</h5>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>{tableTurnover.sum_cleaningTime} min</p>
-                </Card.Body>
-              </Card>
+            <Col md={6}>
+              <Row xs={1} sm={2} md={3} lg={3} className="g-4">
+                <Col>
+                  <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                    <Card.Body style={{ textAlign: 'center' }}>
+                      <h5>Average Table Rearranging Time</h5>
+                      <p style={{ fontWeight: 'bold', fontSize: 20 }}>{tableTurnover.avg_rearrangingTime / 60} min</p>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col>
+                  <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                    <Card.Body style={{ textAlign: 'center' }}>
+                      <h5>Total Table Rearranging Time</h5>
+                      <p style={{ fontWeight: 'bold', fontSize: 20 }}>{tableTurnover.sum_rearrangingTime / 60} min</p>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col>
+                  <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                    <Card.Body style={{ textAlign: 'center' }}>
+                      <h5>Average Cleaning Time</h5>
+                      <p style={{ fontWeight: 'bold', fontSize: 20 }}>{tableTurnover.avg_cleaningTime / 60} min</p>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col>
+                  <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                    <Card.Body style={{ textAlign: 'center' }}>
+                      <h5>Total Cleaning Time</h5>
+                      <p style={{ fontWeight: 'bold', fontSize: 20 }}>{tableTurnover.sum_cleaningTime / 60} min</p>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col>
+                  <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                    <Card.Body style={{ textAlign: 'center' }}>
+                      <h5>Table Turn Over Rate</h5>
+                      <p style={{ fontWeight: 'bold', fontSize: 20 }}>{tableTurnover.ttrate}</p>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              </Row>
+
+              <Form onSubmit={handleSubmit}>
+                <Form.Group controlId="videoFile">
+                  <Form.Label>Video File</Form.Label>
+                  <Form.Control type="file" onChange={handleFileChange} required />
+                </Form.Group>
+                <Button variant="primary" type="submit" className="mt-3">
+                  Submit
+                </Button>
+              </Form>
             </Col>
-            <Col>
-              <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
-                <Card.Body style={{textAlign : 'center'}}>
-                  <h5>Table Turn Over Rate</h5>
-                  <p style={{fontWeight : 'bold',fontSize : 20}}>{tableTurnover.ttrate}</p>
-                </Card.Body>
-              </Card>
-            </Col>
-      
           </Row>
 
-          <Form onSubmit={handleSubmit}>
-            <Form.Group controlId="videoFile">
-              <Form.Label>Video File</Form.Label>
-              <Form.Control type="file" onChange={handleFileChange} required />
-            </Form.Group>
-            <Button variant="primary" type="submit" className="mt-3">
-              Submit
-            </Button>
-          </Form>
-        </Col>
-      </Row>
+
+
+
+
+        </Tab>
+
+
+
+
+
+
+
+      </Tabs>
     </Container>
   );
 }

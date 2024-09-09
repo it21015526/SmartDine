@@ -40,5 +40,3 @@ def get_customer_info():
     latest_row = cursor.fetchone()
     conn.close()
     return latest_row
-
-
