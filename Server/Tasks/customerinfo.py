@@ -2,14 +2,6 @@ import sqlite3
 from datetime import datetime
 
 
-def dropTbl():
-    conn = sqlite3.connect('restaurant_data.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        drop table customerInfo
-    ''')
-    conn.commit()
-    conn.close()
 
 def init_db():
     conn = sqlite3.connect('restaurant_data.db')

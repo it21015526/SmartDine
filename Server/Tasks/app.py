@@ -5,7 +5,6 @@ import time
 import os
 import json
 import numpy as np
-from ultralytics import YOLO
 from t1 import Task1Model
 from t2 import Task2Model
 from t3 import Task3Model
@@ -13,8 +12,6 @@ from t3 import Task3Model
 from customerinfo import save_customer_info,get_customer_info
 from tableInfo import save_table_info,get_table_info
 from interactionInfo import save_interaction_info,get_interaction_info
-
-from ultralytics.engine.results import Results
 
 app = Flask(__name__)
 CORS(app)
@@ -31,7 +28,10 @@ def generate_frames_and_detections(task_model):
     width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
-    spf = 1 / fps 
+    spf = 1 / fps
+
+    rearrangingTime = 0
+    cleaningTime = 0
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
     video = cv2.VideoWriter(task_model.video_path.replace("original", "processed"), fourcc, fps, (width, height))
@@ -54,26 +54,21 @@ def generate_frames_and_detections(task_model):
         if not ret:
             break
 
+        person_count = 0
+        seting_exceed = 0
+        order_exceed = 0
+        food_exceed = 0
+        customer_count = 0
+        table_turnover = 0
+        nonEmpty  = 0
+        waitingTime = 0
+        nonEating = 0
+
         if isinstance(task_model, (Task1Model, Task2Model)):
             # Detect objects in the frame
             results = task_model.detect_objects(frame)
 
             classes = task_model.model.names
-
-            person_count = 0
-            seting_exceed = 0
-            order_exceed = 0
-            food_exceed = 0
-            customer_count = 0
-            table_turnover = 0
-            nonEmpty  = 0
-            waitingTime = 0
-            nonEating = 0
-            rearrangingTime = 0
-            cleaningTime = 0
-
-         
-
 
             for result in results:
                 for i, (box, cls, conf) in enumerate(zip(result.boxes.xyxy.int().cpu().tolist(), result.boxes.cls.int().cpu().tolist(), result.boxes.conf.cpu().tolist())):
@@ -81,7 +76,6 @@ def generate_frames_and_detections(task_model):
                         if classes[cls] == 'person':
                             if task_model.is_waiter(frame, box):
                                 label = "waiter".capitalize()
-
                             else:
                                 customer_count +=1
 
@@ -93,13 +87,9 @@ def generate_frames_and_detections(task_model):
                                 if (order_receive_time != 'N/A' and order_receive_time > 1800): # 30 minutes
                                             food_exceed +=1
 
-                                label = str(f"Customer: Eating, Time: {round(frame_num / fps, 2)}").capitalize()
+                                label = str(f"Customer: {task_model.get_activity(frame, box).capitalize()}, Time: {round(frame_num / fps, 2)}").capitalize()
                                 frame = cv2.putText(frame, f"Seating time: {seating_time}", (box[0], box[1] + 30), font, fontScale, color, thickness, cv2.LINE_AA)
                                 frame = cv2.putText(frame, f"Order receive time: {order_receive_time}", (box[0], box[1] + 60), font, fontScale, color, thickness, cv2.LINE_AA)
-
-                        else:    
-                            label = classes[cls].capitalize()
-                       
                     
                     elif isinstance(task_model, Task2Model):
                         label = f"{classes[cls].replace('_', ' ')}".capitalize()
@@ -128,41 +118,52 @@ def generate_frames_and_detections(task_model):
                         if (label == 'Empty' and task_model.engagement_times.get('is_Finish_eating')):
                             nonEmpty +=1
 
-                    elif isinstance(task_model, (Task3Model)):
-                        print(f"Processing frame {frame_num}")
-
-                        if not task_model.check_layout(frame, frame_num):
-                            time_cleaning = round(time_cleaning + spf, 2)
+                    elif isinstance(task_model, Task3Model):
+                        if classes[cls] == 'person' and not task_model.is_waiter(frame, box):
+                            person_count = person_count + 1
+                    
+                    else:
+                        label = "not supported"
                            
-                        
         if isinstance(task_model, (Task3Model)):
             print(f"Processing frame {frame_num}")
 
             if not task_model.check_layout(frame, frame_num):
-                time_cleaning = round(time_cleaning + spf, 2)
-                cleaningTime = time_cleaning
-            
-            frame = cv2.putText(frame, str(f"Table rearranging time: {time_cleaning} seconds"), (100, 150), font, fontScale, (255, 0, 0), thickness, cv2.LINE_AA)
-            frame = cv2.putText(frame, str(f"Table Cleaning time: N/A"), (100, 180), font, fontScale, (255, 0, 0), thickness, cv2.LINE_AA)
-            frame = cv2.putText(frame, str(f"Table Turnover: {round(person_count / 15, 0)}"), (100, 210), font, fontScale, (255, 0, 0), thickness, cv2.LINE_AA)
-            table_turnover = round(person_count/15, 0)
-            with open("template/0_1.json", "r") as reader:
-                polys = json.load(reader)["shapes"]
+                rearrangingTime = round(rearrangingTime + spf, 2)
+                # cleaningTime = time_cleaning
 
+            table_unclean, bbox = task_model.check_unclean(frame)
+            if table_unclean:
+                frame = cv2.rectangle(frame, tuple(bbox[:2]), tuple(bbox[2:]), (0, 255, 0), 2)
+                frame = cv2.putText(frame, str(f"Not Clean"), tuple(bbox[:2]), font, fontScale, (255, 0, 0), thickness, cv2.LINE_AA)
+                cleaningTime = round(cleaningTime + spf, 2)
+            
+            table_turnover = round(person_count/15, 0)
+            frame = cv2.putText(frame, str(f"Table rearranging time: {rearrangingTime} seconds"), (100, 150), font, fontScale, (255, 0, 0), thickness, cv2.LINE_AA)
+            frame = cv2.putText(frame, str(f"Table Cleaning time: {cleaningTime}"), (100, 180), font, fontScale, (255, 0, 0), thickness, cv2.LINE_AA)
+            frame = cv2.putText(frame, str(f"Table Turnover: {table_turnover}"), (100, 210), font, fontScale, (255, 0, 0), thickness, cv2.LINE_AA)
+
+            with open("C:/Users/Kanishka/Desktop/Smart Dine PP2/SmartDine/Server/Tasks/template/0_1.json", "r") as reader:
+                polys = json.load(reader)["shapes"]
 
             for table, poly in polys.items():
                 frame = cv2.putText(frame, table, (int(poly[0][0]), int(poly[0][1])), font, fontScale, (0, 255, 255), thickness, cv2.LINE_AA)
                 frame = cv2.polylines(frame, [np.array(poly, dtype=np.int32)], True, (0, 0, 255), 1)
-                cap.release()
-                video.release()
-
-            with open(task_model.video_path.replace("original", "processed"), 'rb') as f:
-                yield f.read()
 
         save_table_info(rearrangingTime, cleaningTime, table_turnover)
         save_interaction_info(nonEmpty, waitingTime, nonEating)
         save_customer_info(customer_count, seting_exceed, order_exceed, food_exceed)
+        
+        frame_num = frame_num + 1
+        video.write(frame)
 
+    cap.release()
+    video.release()
+
+    with open(task_model.video_path.replace("original", "processed"), 'rb') as f:
+        yield f.read()
+
+        
 @app.route('/process_video', methods=['POST'])
 def process_video():
     task_type = request.form.get('task_type')

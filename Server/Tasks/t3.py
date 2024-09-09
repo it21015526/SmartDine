@@ -15,7 +15,7 @@ class Task3Model:
         return results
     
     def check_layout(self, frame, frame_num):
-        template = cv2.imread("template/99_1.jpeg")
+        template = cv2.imread("C:/Users/Kanishka/Desktop/Smart Dine PP2/SmartDine/Server/Tasks/template/99_1.jpeg")
 
         if frame.shape[0] < template.shape[0] or frame.shape[1] < template.shape[1]:
             template = cv2.resize(template, (frame.shape[1], frame.shape[0]))
@@ -25,6 +25,22 @@ class Task3Model:
         _, max_val, _, _ = cv2.minMaxLoc(result)
 
         return max_val >= 0.77
+    
+    def check_unclean(self, frame):
+        template = cv2.imread("C:/Users/Kanishka/Desktop/Smart Dine PP2/SmartDine/Server/Tasks/template/unclean.png")
+
+        if frame.shape[0] < template.shape[0] or frame.shape[1] < template.shape[1]:
+            template = cv2.resize(template, (frame.shape[1], frame.shape[0]))
+
+        ##Matching each channel
+        result = cv2.matchTemplate(frame, template, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, max_loc = cv2.minMaxLoc(result)
+
+        x, y = max_loc
+
+        h, w = template.shape[:2]
+
+        return max_val >= 0.25, [x, y, x + w, y + h]
     
     def set_time(self, time):
         if "start" in self.turnover_times:

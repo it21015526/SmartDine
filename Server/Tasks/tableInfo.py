@@ -54,7 +54,3 @@ def get_table_info():
     conn.close()
     return latest_row
 
-
-
-save_table_info(280, 88, 3.1)
-
