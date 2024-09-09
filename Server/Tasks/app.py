@@ -82,16 +82,21 @@ def generate_frames_and_detections(task_model):
 
                         else:    
                             label = classes[cls].capitalize()
-                        
                        
                     
                     elif isinstance(task_model, Task2Model):
                         label = f"{classes[cls].replace('_', ' ')}".capitalize()
                         frame = cv2.rectangle(frame, tuple(box[:2]), tuple(box[2:]), (0, 0, 255), 2)
                         frame = cv2.putText(frame, str(label), tuple(box[:2]), font, fontScale, color, thickness, cv2.LINE_AA)
-                        frame = cv2.putText(frame, "Non-Eating time: N/A", (box[0], box[1] + 30), font, fontScale, color, thickness, cv2.LINE_AA)
-                        frame = cv2.putText(frame, "Waiting time: N/A", (box[0], box[1] + 60), font, fontScale, color, thickness, cv2.LINE_AA)
 
+                        non_eating_duration = task_model.engagement_times.get('non_eating', time.time()) - task_model.engagement_times.get('non_eating_start', time.time())
+                        waiting_time_duration = task_model.engagement_times.get('looking_for_assistance', time.time()) - task_model.engagement_times.get('looking_for_assistance_start', time.time())
+
+                        non_eating_text = f"Non-Eating time: {non_eating_duration:.2f} sec" if 'non_eating_start' in task_model.engagement_times else "Non-Eating time: N/A"
+                        frame = cv2.putText(frame, non_eating_text, (box[0], box[1] + 30), font, fontScale, color, thickness, cv2.LINE_AA)
+
+                        waiting_text = f"Waiting time: {waiting_time_duration:.2f} sec" if 'looking_for_assistance_start' in task_model.engagement_times else "Waiting time: N/A"
+                        frame = cv2.putText(frame, waiting_text, (box[0], box[1] + 60), font, fontScale, color, thickness, cv2.LINE_AA)
 
                     elif isinstance(task_model, (Task3Model)):
                         print(f"Processing frame {frame_num}")
@@ -115,17 +120,14 @@ def generate_frames_and_detections(task_model):
             for table, poly in polys.items():
                 frame = cv2.putText(frame, table, (int(poly[0][0]), int(poly[0][1])), font, fontScale, (0, 255, 255), thickness, cv2.LINE_AA)
                 frame = cv2.polylines(frame, [np.array(poly, dtype=np.int32)], True, (0, 0, 255), 1)
-
-        
-                    
                 cap.release()
                 video.release()
 
             with open(task_model.video_path.replace("original", "processed"), 'rb') as f:
                 yield f.read()
 
-    save_customer_info(customer_count)
-    save_table_info(table_turnover)
+        save_customer_info(customer_count)
+        save_table_info(table_turnover)
 
 @app.route('/process_video', methods=['POST'])
 def process_video():
