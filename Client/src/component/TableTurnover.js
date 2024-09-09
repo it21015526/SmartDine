@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Button, Container, Row, Col, Card } from 'react-bootstrap';
 import task from '../Assets/task3.mp4'; // Import the video file
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -8,6 +8,26 @@ import axios from 'axios';
 function TableTurnover() {
   const [taskType, setTaskType] = useState('');
   const [videoFile, setVideoFile] = useState(null);
+  const [TableTurnover,setTableTurnover] = useState([])
+
+
+
+
+  useEffect(() => {
+    const fetchCustomerCount = () => {
+      axios.get("http://localhost:5000/tableInfo")
+        .then((res) => {
+          console.log(res.data);
+          setTableTurnover(res.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching table info:", error);
+        });
+    };
+    fetchCustomerCount();
+    const intervalId = setInterval(fetchCustomerCount, 10000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleFileChange = (e) => {
     setVideoFile(e.target.files[0]);
@@ -51,7 +71,7 @@ function TableTurnover() {
               <div className="d-flex justify-content-between">
                 <div>
                   <h5>Current Table Turnover Rate:</h5>
-                  <p>16/25</p>
+                  <p>{TableTurnover.currentturnover}</p>
                 </div>
               </div>
             </Card.Body>

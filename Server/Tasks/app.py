@@ -4,10 +4,14 @@ import cv2
 import time
 import os
 import json
+import numpy as np
 from ultralytics import YOLO
 from t1 import Task1Model
 from t2 import Task2Model
 from t3 import Task3Model
+
+from customerinfo import save_customer_info,get_customer_info
+from tableInfo import save_table_info,get_table_info
 
 from ultralytics.engine.results import Results
 
@@ -26,6 +30,7 @@ def generate_frames_and_detections(task_model):
     width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
+    spf = 1 / fps 
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
     video = cv2.VideoWriter(task_model.video_path.replace("original", "processed"), fourcc, fps, (width, height))
@@ -54,6 +59,11 @@ def generate_frames_and_detections(task_model):
 
             classes = task_model.model.names
 
+            person_count = 0
+            customer_count = 0
+            table_turnover = 0
+
+
             for result in results:
                 for i, (box, cls, conf) in enumerate(zip(result.boxes.xyxy.int().cpu().tolist(), result.boxes.cls.int().cpu().tolist(), result.boxes.conf.cpu().tolist())):
                     if isinstance(task_model, Task1Model):
@@ -62,6 +72,7 @@ def generate_frames_and_detections(task_model):
                                 label = "waiter".capitalize()
 
                             else:
+                                customer_count +=1
                                 seating_time = task_model.get_seating_time()
                                 order_receive_time = task_model.get_order_receive_time()
 
@@ -71,44 +82,55 @@ def generate_frames_and_detections(task_model):
 
                         else:    
                             label = classes[cls].capitalize()
+                        
+                       
                     
                     elif isinstance(task_model, Task2Model):
                         label = f"{classes[cls].replace('_', ' ')}".capitalize()
-                        frame = cv2.putText(frame, "Non-Eating time: ", (box[0], box[1] + 30), font, fontScale, color, thickness, cv2.LINE_AA)
-                        frame = cv2.putText(frame, "Waiting time: ", (box[0], box[1] + 60), font, fontScale, color, thickness, cv2.LINE_AA)
-                    
-                    else:
-                        label = "not supported"
-                        
-                    frame = cv2.rectangle(frame, tuple(box[:2]), tuple(box[2:]), (0, 0, 255), 2)
-                    frame = cv2.putText(frame, str(label), tuple(box[:2]), font, fontScale, color, thickness, cv2.LINE_AA)
+                        frame = cv2.rectangle(frame, tuple(box[:2]), tuple(box[2:]), (0, 0, 255), 2)
+                        frame = cv2.putText(frame, str(label), tuple(box[:2]), font, fontScale, color, thickness, cv2.LINE_AA)
+                        frame = cv2.putText(frame, "Non-Eating time: N/A", (box[0], box[1] + 30), font, fontScale, color, thickness, cv2.LINE_AA)
+                        frame = cv2.putText(frame, "Waiting time: N/A", (box[0], box[1] + 60), font, fontScale, color, thickness, cv2.LINE_AA)
 
-        else:
+
+                    elif isinstance(task_model, (Task3Model)):
+                        print(f"Processing frame {frame_num}")
+
+                        if not task_model.check_layout(frame, frame_num):
+                            time_cleaning = round(time_cleaning + spf, 2)
+                        
+        if isinstance(task_model, (Task3Model)):
             print(f"Processing frame {frame_num}")
 
             if not task_model.check_layout(frame, frame_num):
-                time_cleaning = round(frame_num / fps, 2)
+                time_cleaning = round(time_cleaning + spf, 2)
             
-            # time_cleaning = task_model.calculate_time()
-            frame = cv2.putText(frame, str(f"Table rearranging time: {time_cleaning} seconds"), (100, 150), font, fontScale, (0, 0, 255), thickness, cv2.LINE_AA)
-            frame = cv2.putText(frame, str(f"Table Turnover time: N/A"), (100, 180), font, fontScale, (0, 0, 255), thickness, cv2.LINE_AA)
+            frame = cv2.putText(frame, str(f"Table rearranging time: {time_cleaning} seconds"), (100, 150), font, fontScale, (255, 0, 0), thickness, cv2.LINE_AA)
+            frame = cv2.putText(frame, str(f"Table Turnover time: N/A"), (100, 180), font, fontScale, (255, 0, 0), thickness, cv2.LINE_AA)
+            frame = cv2.putText(frame, str(f"Table Turnover: {round(person_count / 15, 0)}"), (100, 210), font, fontScale, (255, 0, 0), thickness, cv2.LINE_AA)
+            table_turnover = round(person_count / 15, 0)
+            with open("template/0_1.json", "r") as reader:
+                polys = json.load(reader)["shapes"]
 
+            for table, poly in polys.items():
+                frame = cv2.putText(frame, table, (int(poly[0][0]), int(poly[0][1])), font, fontScale, (0, 255, 255), thickness, cv2.LINE_AA)
+                frame = cv2.polylines(frame, [np.array(poly, dtype=np.int32)], True, (0, 0, 255), 1)
 
-        frame_num = frame_num + 1
-        video.write(frame)
         
-    cap.release()
-    video.release()
+                    
+                cap.release()
+                video.release()
 
-    with open(task_model.video_path.replace("original", "processed"), 'rb') as f:
-        yield f.read()
+            with open(task_model.video_path.replace("original", "processed"), 'rb') as f:
+                yield f.read()
 
+    save_customer_info(customer_count)
+    save_table_info(table_turnover)
 
 @app.route('/process_video', methods=['POST'])
 def process_video():
     task_type = request.form.get('task_type')
     video_file = request.files.get('video')
-    model_path = request.form.get('model_path')
 
     if task_type not in TASK_MODELS:
         return jsonify({'error': 'Invalid task type'}), 400
@@ -132,6 +154,34 @@ def process_video():
                     mimetype='video/mp4',
                     content_type='video/mp4',
                     direct_passthrough=True)
+
+
+@app.route('/currentCustomer', methods=['GET'])
+def current_customer_count():
+    latest_info = get_customer_info()
+    
+    if latest_info:
+        datetime, customer_count = latest_info
+        return jsonify({
+            'datetime': datetime,
+            'customer_count': customer_count
+        })
+    else:
+        return jsonify({'error': 'No data available'}), 404
+    
+@app.route('/tableInfo', methods=['GET'])
+def current_table_turnover():
+    latest_info = get_table_info()
+    
+    if latest_info:
+        datetime, currentturnover = latest_info
+        return jsonify({
+            'datetime': datetime,
+            'currentturnover': currentturnover
+        })
+    else:
+        return jsonify({'error': 'No data available'}), 404
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
