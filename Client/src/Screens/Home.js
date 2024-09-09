@@ -54,8 +54,8 @@ function Home() {
         <Box
           component="img"
           sx={{
-            height: { xs: 250, md: 400 },
-            width: { xs: 250, md: 400 },
+            height: { xs: 250, md: 300 },
+            width: { xs: 250, md: 300 },
             borderRadius: '50%',
             boxShadow: '0px 10px 20px rgba(0, 0, 0, 0.2)',
           }}

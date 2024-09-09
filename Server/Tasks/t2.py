@@ -11,7 +11,8 @@ class Task2Model:
         self.initial_food_areas = []
         self.engagement_times = {
             'non_eating_duration': 0,
-            'waiting_duration': 0
+            'waiting_duration': 0,
+            'is_Finish_eating' : False
         }
 
     def detect_objects(self, frame):
@@ -67,6 +68,12 @@ class Task2Model:
                     print(f"Eating started at: {self.engagement_times['eating_start']}")
                 self.engagement_times['eating'] = time.time()
 
+            if result['label'] == 'Finish_eating':
+                if 'eating_start' not in self.engagement_times:
+                    self.engagement_times['eating_end'] = time.time()
+                    self.engagement_times['finish'] = time.time()
+                    self.engagement_times["is_Finish_eating"] = True
+
             elif result['label'] == 'phone':
                 if 'non_eating_start' not in self.engagement_times:
                     self.engagement_times['non_eating_start'] = time.time()
@@ -81,6 +88,9 @@ class Task2Model:
 
         # Update non-eating and waiting durations after processing the frame
         self.update_durations()
+
+    def checkEatingEnd(self):
+        return self.engagement_times["is_Finish_eating"]
 
     def process_video(self):
         cap = cv2.VideoCapture(self.video_path)

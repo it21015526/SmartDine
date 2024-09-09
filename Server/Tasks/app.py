@@ -12,6 +12,7 @@ from t3 import Task3Model
 
 from customerinfo import save_customer_info,get_customer_info
 from tableInfo import save_table_info,get_table_info
+from interactionInfo import save_interaction_info,get_interaction_info
 
 from ultralytics.engine.results import Results
 
@@ -65,6 +66,11 @@ def generate_frames_and_detections(task_model):
             food_exceed = 0
             customer_count = 0
             table_turnover = 0
+            nonEmpty  = 0
+            waitingTime = 0
+            nonEating = 0
+            rearrangingTime = 0
+            cleaningTime = 0
 
          
 
@@ -108,25 +114,41 @@ def generate_frames_and_detections(task_model):
 
                         waiting_text = f"Waiting time: {waiting_time_duration:.2f} sec" if 'looking_for_assistance_start' in task_model.engagement_times else "Waiting time: N/A"
                         frame = cv2.putText(frame, waiting_text, (box[0], box[1] + 60), font, fontScale, color, thickness, cv2.LINE_AA)
+                        
+                        if (non_eating_duration > 0) :
+                            nonEating = non_eating_duration
+                        else : 
+                            nonEating = 0
+                        
+                        if (waiting_time_duration > 0):
+                            waitingTime = waiting_time_duration
+                        else : 
+                            waitingTime = 0 
+
+                        if (label == 'Empty' and task_model.engagement_times.get('is_Finish_eating')):
+                            nonEmpty +=1
 
                     elif isinstance(task_model, (Task3Model)):
                         print(f"Processing frame {frame_num}")
 
                         if not task_model.check_layout(frame, frame_num):
                             time_cleaning = round(time_cleaning + spf, 2)
+                           
                         
         if isinstance(task_model, (Task3Model)):
             print(f"Processing frame {frame_num}")
 
             if not task_model.check_layout(frame, frame_num):
                 time_cleaning = round(time_cleaning + spf, 2)
+                cleaningTime = time_cleaning
             
             frame = cv2.putText(frame, str(f"Table rearranging time: {time_cleaning} seconds"), (100, 150), font, fontScale, (255, 0, 0), thickness, cv2.LINE_AA)
-            frame = cv2.putText(frame, str(f"Table Turnover time: N/A"), (100, 180), font, fontScale, (255, 0, 0), thickness, cv2.LINE_AA)
+            frame = cv2.putText(frame, str(f"Table Cleaning time: N/A"), (100, 180), font, fontScale, (255, 0, 0), thickness, cv2.LINE_AA)
             frame = cv2.putText(frame, str(f"Table Turnover: {round(person_count / 15, 0)}"), (100, 210), font, fontScale, (255, 0, 0), thickness, cv2.LINE_AA)
-            table_turnover = round(person_count / 15, 0)
+            table_turnover = round(person_count/15, 0)
             with open("template/0_1.json", "r") as reader:
                 polys = json.load(reader)["shapes"]
+
 
             for table, poly in polys.items():
                 frame = cv2.putText(frame, table, (int(poly[0][0]), int(poly[0][1])), font, fontScale, (0, 255, 255), thickness, cv2.LINE_AA)
@@ -137,8 +159,9 @@ def generate_frames_and_detections(task_model):
             with open(task_model.video_path.replace("original", "processed"), 'rb') as f:
                 yield f.read()
 
+        save_table_info(rearrangingTime, cleaningTime, table_turnover)
+        save_interaction_info(nonEmpty, waitingTime, nonEating)
         save_customer_info(customer_count, seting_exceed, order_exceed, food_exceed)
-        save_table_info(table_turnover)
 
 @app.route('/process_video', methods=['POST'])
 def process_video():
@@ -190,14 +213,32 @@ def current_table_turnover():
     latest_info = get_table_info()
     
     if latest_info:
-        datetime, currentturnover = latest_info
+        avg_rearrangingTime, sum_rearrangingTime, avg_cleaningTime, sum_cleaningTime, ttrate,datetime = latest_info
         return jsonify({
-            'datetime': datetime,
-            'currentturnover': currentturnover
+            'avg_rearrangingTime': avg_rearrangingTime,
+            'sum_rearrangingTime': sum_rearrangingTime,
+            'avg_cleaningTime': avg_cleaningTime,
+            'sum_cleaningTime': sum_cleaningTime,
+            'ttrate': ttrate,
+            'datetime' : datetime
         })
     else:
         return jsonify({'error': 'No data available'}), 404
 
+@app.route('/interactionInfo', methods=['GET'])
+def current_interaction_info():
+    latest_info = get_interaction_info()
+    
+    if latest_info:
+        datetime, nonEmpty, waitingTime, nonEating = latest_info
+        return jsonify({
+            'datetime': datetime,
+            'nonEmpty': nonEmpty,
+            'waitingTime': waitingTime,
+            'nonEating': nonEating
+        })
+    else:
+        return jsonify({'error': 'No data available'}), 404
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
