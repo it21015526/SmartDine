@@ -2,22 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { Form, Button, Container, Row, Col, Card } from 'react-bootstrap';
 import task from '../Assets/task3.mp4'; // Import the video file
 import 'bootstrap/dist/css/bootstrap.min.css';
-
 import axios from 'axios';
 
 function TableTurnover() {
-  const [taskType, setTaskType] = useState('');
   const [videoFile, setVideoFile] = useState(null);
-  const [TableTurnover,setTableTurnover] = useState([])
-
-
-
+  const [tableTurnover, setTableTurnover] = useState({ currentturnover: 'Loading...' });
 
   useEffect(() => {
     const fetchCustomerCount = () => {
       axios.get("http://localhost:5000/tableInfo")
         .then((res) => {
-          console.log(res.data);
           setTableTurnover(res.data);
         })
         .catch((error) => {
@@ -66,34 +60,62 @@ function TableTurnover() {
           </video>
         </Col>
         <Col md={6}>
-          <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
-            <Card.Body>
-              <div className="d-flex justify-content-between">
-                <div>
-                  <h5>Current Table Turnover Rate:</h5>
-                  <p>{TableTurnover.currentturnover}</p>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-
-          <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
-            <Card.Body>
-              <div className="d-flex justify-content-between">
-                <div>
+          <Row xs={1} sm={2} md={3} lg={3} className="g-4">
+            <Col>
+              <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                <Card.Body style={{textAlign : 'center'}}>
+                  <h5 >Average Table Rearranging time</h5>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>{tableTurnover.currentturnover}</p>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col>
+              <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                <Card.Body style={{textAlign : 'center'}}>
+                  <h5>Total Table Rearranging time</h5>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>45.56 min</p>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col>
+              <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                <Card.Body style={{textAlign : 'center'}}>
+                  <h5>Average Cleaning Time</h5>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>5.4 min</p>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col>
+              <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                <Card.Body style={{textAlign : 'center'}}>
+                  <h5>Total Cleaning Time</h5>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>30.56 min</p>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col>
+              <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                <Card.Body style={{textAlign : 'center'}}>
+                  <h5>Table Turn Over Rate</h5>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>3.2</p>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col>
+              <Card className="mb-4" style={{ backgroundColor: 'orange', borderRadius: 18 }}>
+                <Card.Body style={{textAlign : 'center'}}>
                   <h5>Total Detected Layout Changes:</h5>
-                  <p>0</p>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>5</p>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
 
           <Form onSubmit={handleSubmit}>
-                <Form.Group controlId="videoFile">
+            <Form.Group controlId="videoFile">
               <Form.Label>Video File</Form.Label>
               <Form.Control type="file" onChange={handleFileChange} required />
             </Form.Group>
-
             <Button variant="primary" type="submit" className="mt-3">
               Submit
             </Button>

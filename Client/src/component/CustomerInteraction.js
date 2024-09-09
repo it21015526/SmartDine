@@ -45,20 +45,32 @@ function CustomerInteraction() {
           </video>
         </Col>
         <Col md={6}>
-          <Card className="mb-4" style={{ backgroundColor: 'cyan', borderRadius: 18 }}>
-            <Card.Body>
-              <div className="d-flex justify-content-between">
-                <div>
-                  <h5>Incidents:</h5>
-                  <p>0</p>
-                </div>
-                <div>
-                  <h5>Other Value:</h5>
-                  <p>0</p>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
+        <Row xs={1} sm={2} md={3} lg={3} className="g-4">
+            <Col>
+              <Card className="mb-4" style={{ backgroundColor: 'yellow', borderRadius: 18,height : 130 }}>
+                <Card.Body style={{textAlign : 'center'}}>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>1</p>
+                  <h6 >Dining Completed Non-Empty plates</h6>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col>
+              <Card className="mb-4" style={{ backgroundColor: 'yellow', borderRadius: 18,height : 130 }}>
+                <Card.Body style={{textAlign : 'center'}}>
+                  <h5>Average Seating Time exceeded </h5>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>45.56</p>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col>
+              <Card className="mb-4" style={{ backgroundColor: 'yellow', borderRadius: 18,height : 130 }}>
+                <Card.Body style={{textAlign : 'center'}}>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>5.4</p>
+                  <h5>Non Eating Dining time </h5>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
 
           <Form onSubmit={handleSubmit}>
             <Form.Group controlId="videoFile">

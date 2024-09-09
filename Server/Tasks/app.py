@@ -60,8 +60,13 @@ def generate_frames_and_detections(task_model):
             classes = task_model.model.names
 
             person_count = 0
+            seting_exceed = 0
+            order_exceed = 0
+            food_exceed = 0
             customer_count = 0
             table_turnover = 0
+
+         
 
 
             for result in results:
@@ -73,8 +78,14 @@ def generate_frames_and_detections(task_model):
 
                             else:
                                 customer_count +=1
+
                                 seating_time = task_model.get_seating_time()
                                 order_receive_time = task_model.get_order_receive_time()
+
+                                if (seating_time != 'N/A' and seating_time > 600): #10 minutes
+                                            seting_exceed +=1
+                                if (order_receive_time != 'N/A' and order_receive_time > 1800): # 30 minutes
+                                            food_exceed +=1
 
                                 label = str(f"Customer: Eating, Time: {round(frame_num / fps, 2)}").capitalize()
                                 frame = cv2.putText(frame, f"Seating time: {seating_time}", (box[0], box[1] + 30), font, fontScale, color, thickness, cv2.LINE_AA)
@@ -126,7 +137,7 @@ def generate_frames_and_detections(task_model):
             with open(task_model.video_path.replace("original", "processed"), 'rb') as f:
                 yield f.read()
 
-        save_customer_info(customer_count)
+        save_customer_info(customer_count, seting_exceed, order_exceed, food_exceed)
         save_table_info(table_turnover)
 
 @app.route('/process_video', methods=['POST'])
@@ -163,10 +174,13 @@ def current_customer_count():
     latest_info = get_customer_info()
     
     if latest_info:
-        datetime, customer_count = latest_info
+        datetime, customer_count, seting_exceed, order_exceed, food_exceed = latest_info
         return jsonify({
             'datetime': datetime,
-            'customer_count': customer_count
+            'customer_count': customer_count,
+            'seting_exceed': seting_exceed,
+            'order_exceed': order_exceed,
+            'food_exceed': food_exceed
         })
     else:
         return jsonify({'error': 'No data available'}), 404

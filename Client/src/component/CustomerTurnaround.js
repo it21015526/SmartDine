@@ -58,6 +58,7 @@ export default function CustomerTurnaround() {
       <Row className="mb-4">
         <Col>
           <h2 className="text-center font-weight-bold">Customer Turnaround</h2>
+          <h6 className="text-center font-weight-bold">Last Updated : {CustomerCount.datetime}</h6>
         </Col>
       </Row>
       <Row>
@@ -68,23 +69,33 @@ export default function CustomerTurnaround() {
           </video>
         </Col>
         <Col md={6}>
-          <Card className="mb-4" style={{ backgroundColor: 'cyan', borderRadius: 18 }}>
-            <Card.Body className="d-flex justify-content-center align-items-center">
-              <div>
-                <div className="text-center" style={{ fontSize: 50, fontWeight: 'bold' }}>{CustomerCount.customer_count}</div>
-                <div className="text-center font-weight-bold">Current Customer Count</div>
-              </div>
-            </Card.Body>
-          </Card>
-
-          <Card className="mb-4" style={{ backgroundColor: 'cyan', borderRadius: 18 }}>
-            <Card.Body className="d-flex justify-content-center align-items-center">
-              <div>
-                <div className="text-center" style={{ fontSize: 50, fontWeight: 'bold' }}>{CustomerCount.datetime}</div>
-                <div className="text-center font-weight-bold">Last Updated</div>
-              </div>
-            </Card.Body>
-          </Card>
+        <Row xs={1} sm={2} md={3} lg={3} className="g-4">
+            <Col>
+              <Card className="mb-4" style={{ backgroundColor: 'cyan', borderRadius: 18,height : 130 }}>
+                <Card.Body style={{textAlign : 'center'}}>
+                  <h5 >Total Customer Count</h5>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>{CustomerCount.customer_count}</p>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col>
+              <Card className="mb-4" style={{ backgroundColor: 'cyan', borderRadius: 18,height : 130 }}>
+                <Card.Body style={{textAlign : 'center'}}>
+                  <h5>Average Seating Time exceeded </h5>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>{CustomerCount.seting_exceed}</p>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col>
+              <Card className="mb-4" style={{ backgroundColor: 'cyan', borderRadius: 18,height : 130 }}>
+                <Card.Body style={{textAlign : 'center'}}>
+                  <h5>Food Delivary Time Exceeded</h5>
+                  <p style={{fontWeight : 'bold',fontSize : 20}}>{CustomerCount.food_exceed}</p>
+                </Card.Body>
+              </Card>
+            </Col>
+         
+          </Row>
 
           <Form onSubmit={handleSubmit}>
             <Form.Group controlId="videoFile">
@@ -92,7 +103,7 @@ export default function CustomerTurnaround() {
               <Form.Control type="file" onChange={handleFileChange} required />
             </Form.Group>
 
-            <Button variant="primary" type="submit" className="mt-3">
+            <Button variant="primary" type="submit" className="mt-2">
               Submit
             </Button>
           </Form>
